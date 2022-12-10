@@ -1,0 +1,39 @@
+{
+  "name": "@dev-creations/hotkeys",
+  "version": "0.1.0",
+  "description": "A zero-dependency js library for creating keyboard shortcuts.",
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["./dist"],
+  "scripts": {
+    "build": "tsc",
+    "build:serve": "tsc -w",
+    "test": "jest"
+  },
+  "keywords": [
+    "hotkey",
+    "hotkeys",
+    "hotkeysjs",
+    "key",
+    "keys",
+    "keyboard",
+    "shortcuts",
+    "keypress"
+  ],
+  "author": "Enrico Gruner <enrico.gruner@dev-creations.de>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dev-creations/hotkeys.git"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.19.3",
+    "@babel/core": "^7.20.5",
+    "@babel/preset-env": "^7.20.2",
+    "@types/node": "^18.11.13",
+    "jest": "^29.3.1",
+    "jest-environment-jsdom": "^29.3.1",
+    "jsdom": "^20.0.3",
+    "typescript": "^4.9.4"
+  }
+}

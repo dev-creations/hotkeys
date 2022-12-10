@@ -1,0 +1,15 @@
+name: Build and Test
+on:
+  push
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Install, Build, and Test 🔧
+        run: |
+          npm ci
+          npm run build
+          npm run test
