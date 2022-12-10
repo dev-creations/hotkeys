@@ -6,9 +6,22 @@ webhotkey("CTRL+ALT+C", () => {
 
 webhotkey("ALT+A", () => {
   console.log("hello world!");
-}, {description: "Test Description"});
+}, {description: "Prints 'hello world!' to the console"});
 
+webhotkey("ALT+A", () => {
+  console.log("hello world2!");
+}, {description: "Prints 'hello world2!' to the console"});
 
-console.log(
-  getHotkeys()
-)
+const hotkeys = getHotkeys();
+
+for (const hotkey of hotkeys) {
+  const tbody = document.querySelector("tbody");
+  const template = document.querySelector('#keyrow');
+  const clone = template.content.cloneNode(true);
+  let td = clone.querySelectorAll("td");
+
+  td[0].textContent = hotkey.key;
+  td[1].textContent = hotkey.description;
+
+  tbody.appendChild(clone);
+}

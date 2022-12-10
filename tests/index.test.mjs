@@ -1,7 +1,11 @@
 import jest from "jest";
-import webhotkey, {setHotkeyOptions, getHotkeys} from "../dist/index.js";
+import webhotkey, {setHotkeyOptions, getHotkeys, removeAllHotkeys} from "../dist/index.js";
 
 describe("Basics", function() {
+  beforeEach(function() {
+    removeAllHotkeys();
+  });
+
   it("should have exported members", function() {
     expect(webhotkey).not.toEqual(undefined);
     expect(setHotkeyOptions).not.toEqual(undefined);
@@ -9,12 +13,22 @@ describe("Basics", function() {
   });
 
   it("should add event", function() {
-    webhotkey("CTRL+A", () => {});
+    webhotkey("ALT+A", () => {});
 
     const hotkeys = getHotkeys();
     
     expect(hotkeys.length === 1).toEqual(true);
-    expect(hotkeys[0].key).toEqual("CTRL+A");
+    expect(hotkeys[0].key).toEqual("ALT+A");
+    expect(typeof hotkeys[0].fn).toEqual("function");
+  });
+
+  it("should add event, modifier should be case-insensitive", function() {
+    webhotkey("alt+A", () => {});
+
+    const hotkeys = getHotkeys();
+    
+    expect(hotkeys.length).toEqual(1);
+    expect(hotkeys[0].key).toEqual("ALT+A");
     expect(typeof hotkeys[0].fn).toEqual("function");
   });
 
@@ -22,9 +36,9 @@ describe("Basics", function() {
     let i = 0;
     function testFn() { i++; }
 
-    webhotkey("CTRL+A", testFn);
+    webhotkey("ALT+A", testFn);
 
-    const event = new KeyboardEvent('keydown', {'key': 'A', ctrlKey: true});
+    const event = new KeyboardEvent('keydown', {'key': 'A', altKey: true});
     document.dispatchEvent(event);
 
     expect(i).toEqual(1);
@@ -32,6 +46,32 @@ describe("Basics", function() {
     document.dispatchEvent(event);
 
     expect(i).toEqual(2);
+  });
+
+  it("should register multiple functions for same key trigger event", function() {
+    let i = 0;
+    function testFn() { i++; }
+
+    webhotkey("ALT+A", testFn);
+    webhotkey("ALT+A", testFn);
+
+    const event = new KeyboardEvent('keydown', {'key': 'A', altKey: true});
+    document.dispatchEvent(event);
+
+    expect(i).toEqual(2);
+  });
+
+  it("shouldn't trigger partial modifiers", function() {
+    let i = 0;
+    function testFn() { i++; }
+
+    webhotkey("CTRL+ALT+A", testFn);
+    webhotkey("ALT+A", testFn);
+
+    const event = new KeyboardEvent('keydown', {'key': 'A', ctrlKey: false, altKey: true});
+    document.dispatchEvent(event);
+
+    expect(i).toEqual(1);
   });
 
   it("shouldn't trigger event when modifier is missing", function() {
@@ -55,16 +95,14 @@ describe("Basics", function() {
   });
 
   it("should throw when trying to register a system key", function() {
-    let i = 0;
-    function testFn() { i++; }
+    function testFn() { }
 
     expect(webhotkey.bind(this, "CTRL+C", testFn)).toThrow(Error);
 
   });
 
   it("shouldn't throw trying to register a system key when option is disabled", function() {
-    let i = 0;
-    function testFn() { i++; }
+    function testFn() { }
 
     setHotkeyOptions({errorOnReserved: false});
 

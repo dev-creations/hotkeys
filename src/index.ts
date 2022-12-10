@@ -23,14 +23,17 @@ interface HotkeyOptions {
   registerMacAlias: boolean, // Register iOS CMD for CTRL, Option for ALT
 }
 
-const hotkeyRegistry: Record<string, RegisteredFunction[]> = {}
-const systemHotKeys: Record<string, ReservedHotKey> = {
-  c: {
+let hotkeyRegistry: Record<string, RegisteredFunction[]> = {}
+const systemHotKeys: Record<string, ReservedHotKey[]> = {
+  c: [{
     reservedIn: "System", options: { description: "Copy", modifier: ["CTRL"] }
-  }
+  }],
+  a: [{
+    reservedIn: "System", options: { description: "Select All", modifier: ["CTRL"] }
+  }]
 }
 
-let reservedHotKeys: Record<string, ReservedHotKey> = {}
+const reservedHotKeys: Record<string, ReservedHotKey> = {}
 
 let hotkeyOptions: HotkeyOptions = {
   allowMultipleKeys: true,
@@ -56,7 +59,9 @@ document.addEventListener("keydown", function(e: KeyboardEvent) {
         .filter(reg => reg.modifier.length === 0))
     } else {
       execKeys.push(...hotkeyRegistry[formattedKey]
-        .filter(reg => reg.modifier.filter(m => !mods.includes(m)).length === 0));
+        .filter(reg => {
+          return containsAllModifyKeys(reg.modifier, mods);
+        }));
     }
 
     for (const execKey of execKeys) {
@@ -84,13 +89,22 @@ function getHotkeys() {
   return hotkeys;
 }
 
+function containsAllModifyKeys(modKeyArr: HotkeyModifier[], checkModKeyArr: HotkeyModifier[]) {
+  return checkModKeyArr.every(c => modKeyArr.includes(c)) && modKeyArr.every(c => checkModKeyArr.includes(c));
+}
+
+function removeAllHotkeys() {
+  hotkeyRegistry = {};
+}
+
 export {
   setHotkeyOptions,
   getHotkeys,
+  removeAllHotkeys,
 };
 
 export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, options?: RegisterWebHotkey) {
-  const formattedHotkey = hotkey.split("+").filter(key => !HotkeyModifierMap.includes(key as HotkeyModifier)).map(key => key.toLowerCase()).join("+");
+  const formattedHotkey = hotkey.split("+").filter(key => !HotkeyModifierMap.includes(key.toUpperCase() as HotkeyModifier)).map(key => key.toLowerCase()).join("+");
   const mods: typeof HotkeyModifierMap = [];
 
   if (/\+/.test(hotkey)) {
@@ -102,9 +116,15 @@ export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, optio
     }
   }
 
+  if (options?.modifier) {
+    mods.push(...options.modifier);
+  }
+
   if (hotkeyOptions.errorOnReserved && systemHotKeys[formattedHotkey]) {
-    if (mods.filter(m => !systemHotKeys[formattedHotkey].options?.modifier?.includes(m)).length === 0) {
-      throw new Error("Trying to register a reserved key")
+    for (const systemKey of systemHotKeys[formattedHotkey]) {
+      if (containsAllModifyKeys(mods, systemKey.options?.modifier || [])) {
+        throw new Error("Trying to register a reserved key")
+      }
     }
   }
 
@@ -114,10 +134,6 @@ export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, optio
 
   if (formattedHotkey.length === 0) {
     throw new Error("No key has been defined");
-  }
-
-  if (options?.modifier) {
-    mods.push(...options.modifier);
   }
 
   if (!hotkeyRegistry[formattedHotkey]) {
