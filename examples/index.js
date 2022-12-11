@@ -12,6 +12,10 @@ webhotkey("ALT+A", () => {
   console.log("hello world2!");
 }, {description: "Prints 'hello world2!' to the console"});
 
+webhotkey("C", () => {
+  console.log("hello world2!");
+}, {modifier: ["CTRL", "ALT"]});
+
 const hotkeys = getHotkeys();
 
 for (const hotkey of hotkeys) {

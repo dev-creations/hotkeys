@@ -1,15 +1,17 @@
-import jest from "jest";
 import webhotkey, {setHotkeyOptions, getHotkeys, removeAllHotkeys} from "../dist/index.js";
 
 describe("Basics", function() {
+  // Reset all options
   beforeEach(function() {
     removeAllHotkeys();
+    setHotkeyOptions({registerMacAlias: true, allowMultipleKeys: true, errorOnReserved: true});
   });
 
   it("should have exported members", function() {
     expect(webhotkey).not.toEqual(undefined);
     expect(setHotkeyOptions).not.toEqual(undefined);
     expect(getHotkeys).not.toEqual(undefined);
+    expect(removeAllHotkeys).not.toEqual(undefined);
   });
 
   it("should add event", function() {
@@ -17,7 +19,22 @@ describe("Basics", function() {
 
     const hotkeys = getHotkeys();
     
-    expect(hotkeys.length === 1).toEqual(true);
+    // It will register 2 hotkeys, because it will register the mac equivalent
+    expect(hotkeys.length).toEqual(2);
+    expect(hotkeys[0].key).toEqual("OPTION+A");
+    expect(hotkeys[1].key).toEqual("ALT+A");
+    expect(typeof hotkeys[0].fn).toEqual("function");
+    expect(typeof hotkeys[1].fn).toEqual("function");
+  });
+
+  it("should add event without Mac keys", function() {
+    setHotkeyOptions({registerMacAlias: false});
+    
+    webhotkey("ALT+A", () => {});
+
+    const hotkeys = getHotkeys();
+    
+    expect(hotkeys.length).toEqual(1);
     expect(hotkeys[0].key).toEqual("ALT+A");
     expect(typeof hotkeys[0].fn).toEqual("function");
   });
@@ -27,9 +44,9 @@ describe("Basics", function() {
 
     const hotkeys = getHotkeys();
     
-    expect(hotkeys.length).toEqual(1);
-    expect(hotkeys[0].key).toEqual("ALT+A");
-    expect(typeof hotkeys[0].fn).toEqual("function");
+    expect(hotkeys.length).toEqual(2);
+    expect(hotkeys[1].key).toEqual("ALT+A");
+    expect(typeof hotkeys[1].fn).toEqual("function");
   });
 
   it("should trigger event", function() {
@@ -107,6 +124,10 @@ describe("Basics", function() {
     setHotkeyOptions({errorOnReserved: false});
 
     expect(webhotkey.bind(this, "CTRL+C", testFn)).not.toThrow(Error);
+  });
+
+  it("should throw when adding a key without modifier", function() {
+    expect(webhotkey.bind(this, "A", () => {})).toThrow(Error);
   });
 
   it("should throw when trying to register an empty key", function() {

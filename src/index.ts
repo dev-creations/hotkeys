@@ -23,6 +23,8 @@ interface HotkeyOptions {
   registerMacAlias: boolean, // Register iOS CMD for CTRL, Option for ALT
 }
 
+const isMacOs = navigator.platform.indexOf('Mac') > -1 || navigator.userAgent.indexOf('Mac') > -1;
+
 let hotkeyRegistry: Record<string, RegisteredFunction[]> = {}
 const systemHotKeys: Record<string, ReservedHotKey[]> = {
   c: [{
@@ -48,9 +50,14 @@ document.addEventListener("keydown", function(e: KeyboardEvent) {
     const mods: HotkeyModifier[] = [];
 
     if (e.ctrlKey) { mods.push("CTRL"); }
-    if (e.altKey) { mods.push("ALT"); }
+    if (e.metaKey && isMacOs) { mods.push("CMD"); }
+    if (e.altKey) {
+      if (!isMacOs) {
+        mods.push("ALT"); }
+      } else {
+        mods.push("OPTION");
+      }
     if (e.shiftKey) { mods.push("SHIFT"); }
-    if (e.metaKey) { mods.push("CMD"); }
 
     const execKeys = [];
 
@@ -128,6 +135,10 @@ export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, optio
     }
   }
 
+  if (mods.length === 0) {
+    throw new Error("No modifier defined");
+  }
+
   if (!hotkeyOptions.allowMultipleKeys && formattedHotkey.length > 1) {
     throw new Error("Multiple Keys are not allowed");
   }
@@ -140,5 +151,19 @@ export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, optio
     hotkeyRegistry[formattedHotkey] = [];
   }
 
+  if (hotkeyOptions.registerMacAlias) {
+    if (mods.includes("ALT") || mods.includes("CTRL")) {
+      hotkeyRegistry[formattedHotkey].push({fn, description: options?.description, modifier: mods.map(m => {
+        if (m === "ALT") {
+          return "OPTION";
+        }
+        if (m === "CTRL") {
+          return "CMD";
+        }
+
+        return m;
+      })});
+    }
+  }
   hotkeyRegistry[formattedHotkey].push({fn, description: options?.description, modifier: mods});
 }

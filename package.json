@@ -1,6 +1,6 @@
 {
   "name": "@dev-creations/hotkeys",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A zero-dependency js library for creating keyboard shortcuts.",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
