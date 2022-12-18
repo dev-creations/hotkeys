@@ -1,4 +1,4 @@
-import webhotkey, {getHotkeys} from "/dist/index.js";
+import webhotkey, {getHotkeys} from "/dist/index.mjs";
 
 webhotkey("CTRL+ALT+C", () => {
   console.log("hello world!");
