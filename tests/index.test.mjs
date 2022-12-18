@@ -4,7 +4,7 @@ describe("Basics", function() {
   // Reset all options
   beforeEach(function() {
     removeAllHotkeys();
-    setHotkeyOptions({registerMacAlias: true, allowMultipleKeys: true, errorOnReserved: true});
+    setHotkeyOptions({allowMultipleKeys: true, errorOnReserved: true});
   });
 
   it("should have exported members", function() {
@@ -19,21 +19,6 @@ describe("Basics", function() {
 
     const hotkeys = getHotkeys();
     
-    // It will register 2 hotkeys, because it will register the mac equivalent
-    expect(hotkeys.length).toEqual(2);
-    expect(hotkeys[0].key).toEqual("OPTION+A");
-    expect(hotkeys[1].key).toEqual("ALT+A");
-    expect(typeof hotkeys[0].fn).toEqual("function");
-    expect(typeof hotkeys[1].fn).toEqual("function");
-  });
-
-  it("should add event without Mac keys", function() {
-    setHotkeyOptions({registerMacAlias: false});
-    
-    webhotkey("ALT+A", () => {});
-
-    const hotkeys = getHotkeys();
-    
     expect(hotkeys.length).toEqual(1);
     expect(hotkeys[0].key).toEqual("ALT+A");
     expect(typeof hotkeys[0].fn).toEqual("function");
@@ -44,9 +29,9 @@ describe("Basics", function() {
 
     const hotkeys = getHotkeys();
     
-    expect(hotkeys.length).toEqual(2);
-    expect(hotkeys[1].key).toEqual("ALT+A");
-    expect(typeof hotkeys[1].fn).toEqual("function");
+    expect(hotkeys.length).toEqual(1);
+    expect(hotkeys[0].key).toEqual("ALT+A");
+    expect(typeof hotkeys[0].fn).toEqual("function");
   });
 
   it("should trigger event", function() {
@@ -56,6 +41,22 @@ describe("Basics", function() {
     webhotkey("ALT+A", testFn);
 
     const event = new KeyboardEvent('keydown', {'key': 'A', altKey: true});
+    document.dispatchEvent(event);
+
+    expect(i).toEqual(1);
+
+    document.dispatchEvent(event);
+
+    expect(i).toEqual(2);
+  });
+
+  it("should trigger event with iOS CMD key when iOS is true", function() {
+    let i = 0;
+    function testFn() { i++; }
+
+    webhotkey("ALT+CMD+A", testFn);
+
+    const event = new KeyboardEvent('keydown', {'key': 'A', altKey: true, metaKey: true});
     document.dispatchEvent(event);
 
     expect(i).toEqual(1);

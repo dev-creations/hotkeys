@@ -86,19 +86,3 @@ console.log(getHotkeys());
 
 // Array(0)
 ```
-
-## Hotkeys on MacOS
-
-By default, whenever you register a hotkey using the ALT or CTRL modifier there will also be OPTION and CMD modifiers registered for Mac users.
-ALT will map to OPTION and CTRL will map to CMD. You can disable that feature using `setHotkeyOptions`.
-
-```js
-import webhotkey, {setHotkeyOptions} from "@dev-creations/hotkeys";
-
-setHotkeyOptions({registerMacAlias: false});
-
-// This will now only register CTRL+E and not CMD+E for MacOS.
-webhotkey("CTRL+E", () => {
-  console.log("hello world!");
-});
-```

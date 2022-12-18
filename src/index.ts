@@ -1,5 +1,5 @@
-type HotkeyModifier = "CTRL" | "ALT" | "SHIFT" | "OPTION" | "CMD";
-const HotkeyModifierMap: HotkeyModifier[] = ["CTRL", "ALT", "SHIFT", "OPTION", "CMD"];
+type HotkeyModifier = "CTRL" | "ALT" | "SHIFT" | "CMD";
+const HotkeyModifierMap: HotkeyModifier[] = ["CTRL", "ALT", "SHIFT", "CMD"];
 
 interface RegisterWebHotkey {
   description?: string;
@@ -20,10 +20,7 @@ interface ReservedHotKey {
 interface HotkeyOptions {
   allowMultipleKeys: boolean, // Allow assigning multiple functions per key
   errorOnReserved: boolean, // Throw when trying to assign ReservedHotKeys
-  registerMacAlias: boolean, // Register iOS CMD for CTRL, Option for ALT
 }
-
-const isMacOs = navigator.platform.indexOf('Mac') > -1 || navigator.userAgent.indexOf('Mac') > -1;
 
 let hotkeyRegistry: Record<string, RegisteredFunction[]> = {}
 const systemHotKeys: Record<string, ReservedHotKey[]> = {
@@ -40,7 +37,6 @@ const reservedHotKeys: Record<string, ReservedHotKey> = {}
 let hotkeyOptions: HotkeyOptions = {
   allowMultipleKeys: true,
   errorOnReserved: true,
-  registerMacAlias: true,
 }
 
 document.addEventListener("keydown", function(e: KeyboardEvent) {
@@ -50,13 +46,8 @@ document.addEventListener("keydown", function(e: KeyboardEvent) {
     const mods: HotkeyModifier[] = [];
 
     if (e.ctrlKey) { mods.push("CTRL"); }
-    if (e.metaKey && isMacOs) { mods.push("CMD"); }
-    if (e.altKey) {
-      if (!isMacOs) {
-        mods.push("ALT"); }
-      } else {
-        mods.push("OPTION");
-      }
+    if (e.metaKey) { mods.push("CMD"); }
+    if (e.altKey) { mods.push("ALT"); }
     if (e.shiftKey) { mods.push("SHIFT"); }
 
     const execKeys = [];
@@ -151,19 +142,5 @@ export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, optio
     hotkeyRegistry[formattedHotkey] = [];
   }
 
-  if (hotkeyOptions.registerMacAlias) {
-    if (mods.includes("ALT") || mods.includes("CTRL")) {
-      hotkeyRegistry[formattedHotkey].push({fn, description: options?.description, modifier: mods.map(m => {
-        if (m === "ALT") {
-          return "OPTION";
-        }
-        if (m === "CTRL") {
-          return "CMD";
-        }
-
-        return m;
-      })});
-    }
-  }
   hotkeyRegistry[formattedHotkey].push({fn, description: options?.description, modifier: mods});
 }
