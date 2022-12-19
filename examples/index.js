@@ -1,18 +1,18 @@
-import webhotkey, {getHotkeys} from "/dist/index.js";
+import { setHotkey, getHotkeys } from "/dist/index.mjs";
 
-webhotkey("CTRL+ALT+C", () => {
+setHotkey("CTRL+ALT+C", () => {
   console.log("hello world!");
 });
 
-webhotkey("ALT+A", () => {
+setHotkey("ALT+A", () => {
   console.log("hello world!");
 }, {description: "Prints 'hello world!' to the console"});
 
-webhotkey("ALT+A", () => {
+setHotkey("ALT+A", () => {
   console.log("hello world2!");
 }, {description: "Prints 'hello world2!' to the console"});
 
-webhotkey("C", () => {
+setHotkey("C", () => {
   console.log("hello world2!");
 }, {modifier: ["CTRL", "ALT"]});
 

@@ -13,7 +13,7 @@ interface RegisteredFunction {
 }
 
 interface ReservedHotKey {
-  reservedIn: "Chrome" | "Windows" | "Firefox" | "Mac" | "Safari" | "System";
+  reservedIn: "System" | "Browser" | "Mac";
   options?: RegisterWebHotkey;
 }
 
@@ -24,12 +24,46 @@ interface HotkeyOptions {
 
 let hotkeyRegistry: Record<string, RegisteredFunction[]> = {}
 const systemHotKeys: Record<string, ReservedHotKey[]> = {
-  c: [{
-    reservedIn: "System", options: { description: "Copy", modifier: ["CTRL"] }
-  }],
-  a: [{
-    reservedIn: "System", options: { description: "Select All", modifier: ["CTRL"] }
-  }]
+  space: [
+    { reservedIn: "Mac", options: { description: "Spotlight Search", modifier: ["CTRL"] } },
+    { reservedIn: "Mac", options: { description: "Spotlight Search", modifier: ["CMD"] } },
+  ],
+  a: [
+    { reservedIn: "System", options: { description: "Select All", modifier: ["CTRL"] } },
+    { reservedIn: "System", options: { description: "Select All", modifier: ["CMD"] } },
+  ],
+  c: [
+    { reservedIn: "System", options: { description: "Copy", modifier: ["CTRL"] } },
+    { reservedIn: "System", options: { description: "Copy", modifier: ["CMD"] } },
+  ],
+  f: [
+    { reservedIn: "System", options: { description: "Find", modifier: ["CTRL"] } },
+    { reservedIn: "System", options: { description: "Find", modifier: ["CMD"] } },
+  ],
+  p: [
+    { reservedIn: "System", options: { description: "Print", modifier: ["CTRL"] } },
+    { reservedIn: "System", options: { description: "Print", modifier: ["CMD"] } },
+  ],
+  s: [
+    { reservedIn: "System", options: { description: "Save", modifier: ["CTRL"] } },
+    { reservedIn: "System", options: { description: "Save", modifier: ["CMD"] } },
+  ],
+  t: [
+    { reservedIn: "Browser", options: { description: "New Tab", modifier: ["CTRL"] } },
+    { reservedIn: "Browser", options: { description: "New Tab", modifier: ["CMD"] } },
+  ],
+  v: [
+    { reservedIn: "System", options: { description: "Paste", modifier: ["CTRL"] } },
+    { reservedIn: "System", options: { description: "Paste", modifier: ["CMD"] } },
+  ],
+  x: [
+    { reservedIn: "System", options: { description: "Cut", modifier: ["CTRL"] } },
+    { reservedIn: "System", options: { description: "Cut", modifier: ["CMD"] } },
+  ],
+  z: [
+    { reservedIn: "System", options: { description: "Undo", modifier: ["CTRL"] } },
+    { reservedIn: "System", options: { description: "Undo", modifier: ["CMD"] } },
+  ],
 }
 
 const reservedHotKeys: Record<string, ReservedHotKey> = {}
@@ -39,9 +73,18 @@ let hotkeyOptions: HotkeyOptions = {
   errorOnReserved: true,
 }
 
-document.addEventListener("keydown", function(e: KeyboardEvent) {
-  const formattedKey = e.key.toLocaleLowerCase();
+const specialKeys = {
+  ' ': 'space',
+}
 
+const formatKey = (key: string) => {
+  const lowerCaseKey = key.toLocaleLowerCase();
+  const specialKey = specialKeys[lowerCaseKey as keyof typeof specialKeys];
+  return specialKey || lowerCaseKey;
+}
+
+document.addEventListener("keydown", function(e: KeyboardEvent) {
+  const formattedKey = formatKey(e.code.replace(/key/i, ""));
   if (hotkeyRegistry[formattedKey]) {
     const mods: HotkeyModifier[] = [];
 
@@ -95,13 +138,7 @@ function removeAllHotkeys() {
   hotkeyRegistry = {};
 }
 
-export {
-  setHotkeyOptions,
-  getHotkeys,
-  removeAllHotkeys,
-};
-
-export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, options?: RegisterWebHotkey) {
+function setHotkey(hotkey: keyof typeof hotkeyRegistry, fn: Function, options?: RegisterWebHotkey) {
   const formattedHotkey = hotkey.split("+").filter(key => !HotkeyModifierMap.includes(key.toUpperCase() as HotkeyModifier)).map(key => key.toLowerCase()).join("+");
   const mods: typeof HotkeyModifierMap = [];
 
@@ -121,7 +158,7 @@ export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, optio
   if (hotkeyOptions.errorOnReserved && systemHotKeys[formattedHotkey]) {
     for (const systemKey of systemHotKeys[formattedHotkey]) {
       if (containsAllModifyKeys(mods, systemKey.options?.modifier || [])) {
-        throw new Error("Trying to register a reserved key")
+        throw new Error(`Trying to register a reserved key. The key is registered for "${systemKey.options?.description}" in "${systemKey.reservedIn}".`)
       }
     }
   }
@@ -144,3 +181,10 @@ export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, optio
 
   hotkeyRegistry[formattedHotkey].push({fn, description: options?.description, modifier: mods});
 }
+
+export {
+  setHotkey,
+  setHotkeyOptions,
+  getHotkeys,
+  removeAllHotkeys,
+};

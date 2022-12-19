@@ -1,4 +1,4 @@
-import webhotkey, {setHotkeyOptions, getHotkeys, removeAllHotkeys} from "../dist/index.js";
+import { setHotkey, setHotkeyOptions, getHotkeys, removeAllHotkeys } from "../dist/index.js";
 
 describe("Basics", function() {
   // Reset all options
@@ -8,14 +8,14 @@ describe("Basics", function() {
   });
 
   it("should have exported members", function() {
-    expect(webhotkey).not.toEqual(undefined);
+    expect(setHotkey).not.toEqual(undefined);
     expect(setHotkeyOptions).not.toEqual(undefined);
     expect(getHotkeys).not.toEqual(undefined);
     expect(removeAllHotkeys).not.toEqual(undefined);
   });
 
   it("should add event", function() {
-    webhotkey("ALT+A", () => {});
+    setHotkey("ALT+A", () => {});
 
     const hotkeys = getHotkeys();
     
@@ -25,7 +25,7 @@ describe("Basics", function() {
   });
 
   it("should add event, modifier should be case-insensitive", function() {
-    webhotkey("alt+A", () => {});
+    setHotkey("alt+A", () => {});
 
     const hotkeys = getHotkeys();
     
@@ -38,9 +38,9 @@ describe("Basics", function() {
     let i = 0;
     function testFn() { i++; }
 
-    webhotkey("ALT+A", testFn);
+    setHotkey("ALT+A", testFn);
 
-    const event = new KeyboardEvent('keydown', {'key': 'A', altKey: true});
+    const event = new KeyboardEvent('keydown', {'code': 'KeyA', altKey: true});
     document.dispatchEvent(event);
 
     expect(i).toEqual(1);
@@ -54,9 +54,9 @@ describe("Basics", function() {
     let i = 0;
     function testFn() { i++; }
 
-    webhotkey("ALT+CMD+A", testFn);
+    setHotkey("ALT+CMD+A", testFn);
 
-    const event = new KeyboardEvent('keydown', {'key': 'A', altKey: true, metaKey: true});
+    const event = new KeyboardEvent('keydown', {'code': 'KeyA', altKey: true, metaKey: true});
     document.dispatchEvent(event);
 
     expect(i).toEqual(1);
@@ -70,10 +70,10 @@ describe("Basics", function() {
     let i = 0;
     function testFn() { i++; }
 
-    webhotkey("ALT+A", testFn);
-    webhotkey("ALT+A", testFn);
+    setHotkey("ALT+A", testFn);
+    setHotkey("ALT+A", testFn);
 
-    const event = new KeyboardEvent('keydown', {'key': 'A', altKey: true});
+    const event = new KeyboardEvent('keydown', {'code': 'KeyA', altKey: true});
     document.dispatchEvent(event);
 
     expect(i).toEqual(2);
@@ -83,10 +83,10 @@ describe("Basics", function() {
     let i = 0;
     function testFn() { i++; }
 
-    webhotkey("CTRL+ALT+A", testFn);
-    webhotkey("ALT+A", testFn);
+    setHotkey("CTRL+ALT+A", testFn);
+    setHotkey("ALT+A", testFn);
 
-    const event = new KeyboardEvent('keydown', {'key': 'A', ctrlKey: false, altKey: true});
+    const event = new KeyboardEvent('keydown', {'code': 'KeyA', ctrlKey: false, altKey: true});
     document.dispatchEvent(event);
 
     expect(i).toEqual(1);
@@ -96,7 +96,7 @@ describe("Basics", function() {
     let i = 0;
     function testFn() { i++; }
 
-    webhotkey("CTRL+ALT+A", testFn);
+    setHotkey("CTRL+ALT+A", testFn);
 
     document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'A', ctrlKey: true}));
     expect(i).toEqual(0);
@@ -106,16 +106,16 @@ describe("Basics", function() {
     let i = 0;
     function testFn() { i++; }
 
-    webhotkey("CTRL+ALT+A", testFn);
+    setHotkey("CTRL+ALT+A", testFn);
 
-    document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'A', ctrlKey: true, altKey: true}));
+    document.dispatchEvent(new KeyboardEvent('keydown', {'code': 'KeyA', ctrlKey: true, altKey: true}));
     expect(i).toEqual(1);
   });
 
   it("should throw when trying to register a system key", function() {
     function testFn() { }
 
-    expect(webhotkey.bind(this, "CTRL+C", testFn)).toThrow(Error);
+    expect(setHotkey.bind(this, "CTRL+C", testFn)).toThrow(Error);
 
   });
 
@@ -124,17 +124,17 @@ describe("Basics", function() {
 
     setHotkeyOptions({errorOnReserved: false});
 
-    expect(webhotkey.bind(this, "CTRL+C", testFn)).not.toThrow(Error);
+    expect(setHotkey.bind(this, "CTRL+C", testFn)).not.toThrow(Error);
   });
 
   it("should throw when adding a key without modifier", function() {
-    expect(webhotkey.bind(this, "A", () => {})).toThrow(Error);
+    expect(setHotkey.bind(this, "A", () => {})).toThrow(Error);
   });
 
   it("should throw when trying to register an empty key", function() {
     function testFn() {}
 
-    expect(webhotkey.bind(this, "CTRL", testFn)).toThrow(Error);
+    expect(setHotkey.bind(this, "CTRL", testFn)).toThrow(Error);
   });
 
   it("should throw when trying to register an multi key with disabled option", function() {
@@ -142,6 +142,6 @@ describe("Basics", function() {
 
     setHotkeyOptions({allowMultipleKeys: false});
 
-    expect(webhotkey.bind(this, "CTRL+A+B", testFn)).toThrow(Error);
+    expect(setHotkey.bind(this, "CTRL+A+B", testFn)).toThrow(Error);
   });
 });
