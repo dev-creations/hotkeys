@@ -9,9 +9,9 @@ The current version is unstable and untested, use at your own risk. Issues and P
 The following example would execute an anonymous function that logs "hello world!" to the console whenever a user presses CTRL+ALT+C.
 
 ```js
-import webhotkey from "@dev-creations/hotkeys";
+import { setHotkey } from "@dev-creations/hotkeys";
 
-webhotkey("CTRL+ALT+C", () => {
+setHotkey("CTRL+ALT+C", () => {
   console.log("hello world!");
 });
 ```
@@ -19,9 +19,9 @@ webhotkey("CTRL+ALT+C", () => {
 You can also add modifiers using options. This will produce the same functionality:
 
 ```js
-import webhotkey from "@dev-creations/hotkeys";
+import { setHotkey } from "@dev-creations/hotkeys";
 
-webhotkey("C", () => {
+setHotkey("C", () => {
   console.log("hello world!");
 }, {modifier: ["CTRL", "ALT"]});
 ```
@@ -31,9 +31,9 @@ webhotkey("C", () => {
 Trying to assign a hotkey to a reserved key would throw an error: 
 
 ```js
-import webhotkey from "@dev-creations/hotkeys";
+import { setHotkey } from "@dev-creations/hotkeys";
 
-webhotkey("CTRL+C", () => {
+setHotkey("CTRL+C", () => {
   console.log("hello world!");
 });
 // -> Throws an error 'Trying to register a reserved key'
@@ -42,11 +42,11 @@ webhotkey("CTRL+C", () => {
 If you want to enable assigning a hotkey to a system key you have to use an option:
 
 ```js
-import webhotkey, {setHotkeyOptions} from "@dev-creations/hotkeys";
+import { setHotkey, setHotkeyOptions} from "@dev-creations/hotkeys";
 
 setHotkeyOptions({errorOnReserved: false});
 
-webhotkey("CTRL+C", () => {
+setHotkey("CTRL+C", () => {
   console.log("hello world!");
 });
 ```
@@ -56,9 +56,9 @@ webhotkey("CTRL+C", () => {
 You can use the `getHotkeys` function to list all hotkeys. 
 
 ```js
-import webhotkey, {getHotkeys} from "@dev-creations/hotkeys";
+import { setHotkey, getHotkeys } from "@dev-creations/hotkeys";
 
-webhotkey("CTRL+ALT+C", () => {
+setHotkey("CTRL+ALT+C", () => {
   console.log("hello world!");
 }, {description: "Prints hello world"});
 
@@ -74,9 +74,9 @@ Use `getHotkeys` to create an overview of your hotkeys for your users.
 You can remove all hotkeys by using `removeAllHotkeys`.
 
 ```js
-import webhotkey, {getHotkeys, removeAllHotkeys} from "@dev-creations/hotkeys";
+import { setHotkey, getHotkeys, removeAllHotkeys } from "@dev-creations/hotkeys";
 
-webhotkey("CTRL+ALT+C", () => {
+setHotkey("CTRL+ALT+C", () => {
   console.log("hello world!");
 }, {description: "Prints hello world"});
 

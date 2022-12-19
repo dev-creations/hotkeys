@@ -84,8 +84,7 @@ const formatKey = (key: string) => {
 }
 
 document.addEventListener("keydown", function(e: KeyboardEvent) {
-  const formattedKey = formatKey(e.key);
-
+  const formattedKey = formatKey(e.code.replace(/key/i, ""));
   if (hotkeyRegistry[formattedKey]) {
     const mods: HotkeyModifier[] = [];
 
@@ -139,13 +138,7 @@ function removeAllHotkeys() {
   hotkeyRegistry = {};
 }
 
-export {
-  setHotkeyOptions,
-  getHotkeys,
-  removeAllHotkeys,
-};
-
-export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, options?: RegisterWebHotkey) {
+function setHotkey(hotkey: keyof typeof hotkeyRegistry, fn: Function, options?: RegisterWebHotkey) {
   const formattedHotkey = hotkey.split("+").filter(key => !HotkeyModifierMap.includes(key.toUpperCase() as HotkeyModifier)).map(key => key.toLowerCase()).join("+");
   const mods: typeof HotkeyModifierMap = [];
 
@@ -188,3 +181,10 @@ export default function(hotkey: keyof typeof hotkeyRegistry, fn: Function, optio
 
   hotkeyRegistry[formattedHotkey].push({fn, description: options?.description, modifier: mods});
 }
+
+export {
+  setHotkey,
+  setHotkeyOptions,
+  getHotkeys,
+  removeAllHotkeys,
+};
